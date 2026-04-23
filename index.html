@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Roger Santos — Offensive Security</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#020408;
+  --surface:#040810;
+  --surface2:#06101a;
+  --border:#0a2a1a;
+  --border2:#0d3520;
+  --accent:#00ff41;
+  --accent2:#00cc33;
+  --accent3:#008f20;
+  --dim:#003310;
+  --text:#c8ffd4;
+  --muted:#2a6640;
+  --label:#1a4d2e;
+  --red:#ff2020;
+  --cyan:#00ffff;
+  --mono:'Share Tech Mono',monospace;
+  --sans:'Rajdhani',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-weight:400;line-height:1.6;min-height:100vh;overflow-x:hidden}
+
+body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,255,65,0.015) 2px,rgba(0,255,65,0.015) 4px);pointer-events:none;z-index:0}
+
+.container{max-width:880px;margin:0 auto;padding:2.5rem 2rem;position:relative;z-index:1}
+
+/* top bar */
+.topbar{display:flex;align-items:center;gap:1rem;margin-bottom:2rem;padding-bottom:1rem;border-bottom:1px solid var(--border2)}
+.topbar-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.topbar-dot.red{background:var(--red);box-shadow:0 0 6px var(--red)}
+.topbar-dot.yellow{background:#ffcc00;box-shadow:0 0 6px #ffcc00}
+.topbar-path{font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-left:0.5rem}
+.topbar-path span{color:var(--accent)}
+
+/* header */
+.header{display:grid;grid-template-columns:1fr auto;gap:2rem;align-items:start;margin-bottom:2.5rem;padding-bottom:2rem;border-bottom:1px solid var(--border2)}
+.name{font-family:var(--mono);font-size:2.6rem;font-weight:400;color:var(--accent);letter-spacing:-0.02em;line-height:1;text-shadow:0 0 20px rgba(0,255,65,0.4)}
+.name-prefix{color:var(--accent3);font-size:1rem}
+.tagline{font-family:var(--mono);font-size:0.68rem;color:var(--accent2);margin-top:0.6rem;letter-spacing:0.12em}
+.location{font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-top:0.4rem}
+.contact-block{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.contact-block a{font-family:var(--mono);font-size:0.65rem;color:var(--muted);text-decoration:none;transition:color 0.2s}
+.contact-block a:hover{color:var(--accent)}
+.contact-block a::before{content:'> ';color:var(--accent3)}
+
+/* prompt line */
+.prompt{font-family:var(--mono);font-size:0.75rem;color:var(--accent3);margin-bottom:0.6rem}
+.prompt span{color:var(--accent)}
+.sec-prompt{font-family:var(--mono);font-size:0.68rem;color:var(--accent3);margin-bottom:0.75rem}
+.sec-prompt span{color:var(--accent)}
+.cursor{display:inline-block;width:8px;height:13px;background:var(--accent);animation:blink 1s step-end infinite;vertical-align:middle;margin-left:2px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+
+/* summary box */
+.summary-box{border:1px solid var(--border2);background:var(--surface);padding:1rem 1.25rem;margin-bottom:2.5rem;position:relative}
+.summary-box::before{content:'// PROFILE';position:absolute;top:-9px;left:12px;font-family:var(--mono);font-size:0.6rem;color:var(--accent3);background:var(--bg);padding:0 6px}
+.summary-text{font-size:0.88rem;color:#7ab88a;line-height:1.8;font-weight:300}
+
+/* section */
+.section{margin-bottom:2.5rem}
+.section-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:1.25rem;position:relative}
+.section-title{font-family:var(--mono);font-size:0.7rem;color:var(--accent);letter-spacing:0.2em;text-transform:uppercase;background:var(--bg);padding-right:0.5rem;position:relative;z-index:1}
+.section-line{flex:1;height:1px;background:linear-gradient(90deg,var(--accent3),transparent)}
+.section-num{font-family:var(--mono);font-size:0.6rem;color:var(--accent3);background:var(--dim);border:1px solid var(--accent3);padding:1px 6px;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%)}
+.section-icon{font-family:var(--mono);font-size:0.65rem;color:var(--accent);opacity:0.4}
+
+/* divider */
+.divider{display:flex;align-items:center;gap:0.5rem;margin:2rem 0;opacity:0.3}
+.divider-line{flex:1;height:1px;background:var(--border2)}
+.divider-text{font-family:var(--mono);font-size:0.55rem;color:var(--accent3);letter-spacing:0.2em}
+
+/* certs */
+.certs-grid{display:flex;flex-wrap:wrap;gap:8px}
+
+/* experience */
+.job{margin-bottom:2rem;padding:1rem 1.25rem;border:1px solid var(--border2);background:var(--surface);position:relative}
+.job::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent3)}
+.job-header{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.25rem}
+.company{font-family:var(--sans);font-weight:600;font-size:1rem;color:#fff;letter-spacing:0.05em}
+.period{font-family:var(--mono);font-size:0.62rem;color:#3a9e5a;letter-spacing:0.05em;border:1px solid #1a5c30;background:#020f08;padding:2px 8px}
+.role{font-family:var(--mono);font-size:0.68rem;color:var(--accent2);margin-bottom:0.75rem;letter-spacing:0.04em}
+.sub-role-block{margin-top:0.75rem;padding-top:0.75rem;border-top:1px solid var(--border)}
+.sub-role-block:first-of-type{margin-top:0.25rem;border-top:none}
+.sub-period{font-family:var(--mono);font-size:0.58rem;color:var(--muted);margin-left:0.5rem;letter-spacing:0.04em}
+.job-bullets{list-style:none;padding:0;margin:0}
+.job-bullets li{font-size:0.82rem;color:#5a9e6a;padding:3px 0 3px 1.1rem;position:relative;font-weight:300}
+.job-bullets li::before{content:'›';position:absolute;left:0;color:var(--accent3);font-size:1rem;line-height:1.4}
+
+/* education */
+.edu-item{display:grid;grid-template-columns:auto 1fr;gap:0 1rem;margin-bottom:1rem;padding-bottom:1rem;border-bottom:1px solid var(--border)}
+.edu-item:last-child{border-bottom:none;margin-bottom:0}
+.edu-year{font-family:var(--mono);font-size:0.62rem;color:var(--accent3);padding-top:2px;white-space:nowrap}
+.edu-degree{font-weight:600;font-size:0.9rem;color:#cde8d0}
+.edu-school{font-family:var(--mono);font-size:0.65rem;color:var(--muted);margin-top:2px}
+.edu-area{font-size:0.75rem;color:#3d7a4d;margin-top:3px;font-weight:300}
+
+/* skills */
+.skills-group{margin-bottom:1rem}
+.skills-label{font-family:var(--mono);font-size:0.6rem;color:var(--accent3);letter-spacing:0.1em;margin-bottom:0.4rem}
+.skills-row{display:flex;flex-wrap:wrap;gap:5px}
+.skill{font-family:var(--mono);font-size:0.65rem;padding:3px 9px;border:1px solid var(--border2);color:var(--muted);background:var(--surface2)}
+.skill.skill-hi{border-color:#1a5c30;color:#3a9e5a;background:#020f08}
+
+/* cert tiers */
+.certs-label{font-family:var(--mono);font-size:0.6rem;color:var(--accent3);letter-spacing:0.1em;margin-bottom:0.5rem}
+.cert{font-family:var(--mono);font-size:0.7rem;padding:5px 12px;border:1px solid var(--accent3);color:var(--accent);background:var(--dim);letter-spacing:0.08em;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);text-decoration:none;transition:color 0.2s,background 0.2s}
+.cert:hover{background:var(--accent3);color:#000}
+.cert.dim{border-color:#1a5c30;color:#3a9e5a;background:#020f08;text-decoration:none}
+.cert.dim:hover{color:var(--accent2)}
+.cert.dim2{border-color:#1a5c30;color:#3a9e5a;background:#020f08;text-decoration:none}
+.cert.dim2:hover{color:var(--accent2)}
+
+/* publications */
+.pub-item{border-left:1px solid var(--border2);padding:0.5rem 0 0.5rem 1rem;margin-bottom:0.75rem}
+.pub-title{font-size:0.83rem;color:#8ecfa0;font-weight:400;margin-bottom:0.2rem}
+.pub-title-link{display:block;font-size:0.83rem;color:#8ecfa0;font-weight:400;margin-bottom:0.2rem;text-decoration:none}
+.pub-title-link:hover{color:var(--accent);text-decoration:underline}
+.pub-meta{font-family:var(--mono);font-size:0.62rem;color:var(--muted)}
+.pub-venue{color:var(--accent3)}
+.pub-link{font-family:var(--mono);font-size:0.7rem;color:var(--accent2);text-decoration:none}
+.pub-link:hover{color:var(--accent)}
+
+/* patents */
+.patent-item{border:1px solid var(--border2);background:var(--surface);padding:0.85rem 1.1rem;margin-bottom:0.85rem;position:relative}
+.patent-item::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--accent3)}
+.patent-header{display:flex;align-items:center;gap:0.75rem;margin-bottom:0.4rem;flex-wrap:wrap}
+.patent-type{font-family:var(--mono);font-size:0.6rem;padding:2px 7px;border:1px solid var(--accent3);color:var(--accent);background:var(--dim);letter-spacing:0.1em}
+.patent-num{font-family:var(--mono);font-size:0.7rem;color:var(--accent2);letter-spacing:0.05em}
+.patent-status{font-family:var(--mono);font-size:0.6rem;color:var(--muted);margin-left:auto}
+.patent-title{font-size:0.86rem;color:#8ecfa0;font-weight:400;margin-bottom:0.25rem}
+.patent-meta{font-family:var(--mono);font-size:0.62rem;color:var(--muted)}
+.patent-link{color:var(--accent2);text-decoration:none}
+.patent-link:hover{color:var(--accent)}
+.lang-inline{font-family:var(--mono);font-size:0.62rem;color:var(--muted);margin-top:0.4rem;letter-spacing:0.03em}
+
+/* footer */
+.footer{border-top:1px solid var(--border2);padding-top:1.25rem;margin-top:2rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-id{font-family:var(--mono);font-size:0.6rem;color:var(--label)}
+.footer-links{display:flex;gap:1.5rem}
+.footer-links a{font-family:var(--mono);font-size:0.6rem;color:var(--muted);text-decoration:none}
+.footer-links a:hover{color:var(--accent)}
+.status{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:0.6rem;color:var(--accent3)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="topbar">
+    <span class="topbar-path">~/roger-santos/<span>portfolio</span> — zsh</span>
+  </div>
+
+  <div class="prompt">root@kali:~# cat <span>profile.txt</span><span class="cursor"></span></div>
+
+  <header class="header">
+    <div>
+      <div class="name"><span class="name-prefix">_</span>roger_santos</div>
+      <div class="tagline">OFFENSIVE SECURITY · RED TEAM · PHD · OSCP · CRTO · CRTP</div>
+      <div class="location">// Curitiba, Paraná, Brazil</div>
+      <div class="lang-inline">Portuguese · native &nbsp;|&nbsp; English · fluent &nbsp;|&nbsp; Spanish · fluent</div>
+    </div>
+    <div class="contact-block">
+      <a href="mailto:rogerwxd@gmail.com">rogerwxd@gmail.com</a>
+      <a href="https://linkedin.com/in/rogerwxd">linkedin/rogerwxd</a>
+      <a href="https://lattes.cnpq.br/3797351864330209">lattes.cnpq.br</a>
+    </div>
+  </header>
+
+  <div class="summary-box">
+    <p class="summary-text">Senior Offensive Security Engineer at Mercado Livre, delivering red team operations, penetration testing, adversarial research, and active bug bounty hunting across web, API, mobile, cloud, and Active Directory environments. PhD in Information Security, bridging deep research with hands-on exploitation. Specialized across emerging attack surfaces including blockchain/smart contract auditing, AI/LLM red teaming, and adversarial machine learning. Certified OSCP+, OSCP, CRTO, CRTP, eWPTX, OSWP.</p>
+  </div>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-text">///</span><div class="divider-line"></div></div>
+
+  <section class="section">
+    <div class="sec-prompt">root@kali:~# ls -la <span>certifications/</span><span class="cursor"></span></div>
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">Certifications</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="certs-label">// TIER 1 — CORE OFFENSIVE</div>
+    <div class="certs-grid" style="margin-bottom:1rem">
+      <a class="cert" href="https://credentials.offsec.com/eb08e172-a6ba-47c4-95c5-6f23134a3cb6#acc.Y9vL4Vkx" target="_blank">OSCP+</a>
+      <a class="cert" href="https://credentials.offsec.com/b710aca7-5504-4461-b429-55392f1d42d7#acc.1HKQp8XJ" target="_blank">OSCP</a>
+      <a class="cert" href="https://badges.parchment.eu/public/assertions/fi5KY5klR5CTwjQ0qGItzA" target="_blank">CRTO</a>
+      <a class="cert" href="https://www.credential.net/f4372e08-a552-4ed8-bbfd-c462c828c4a1#acc.iDbe4HCw" target="_blank">CRTP</a>
+      <a class="cert" href="https://certs.ine.com/482e6806-c6c0-4866-b9b6-dc245e83f8fc#acc.CxRZ1N3P" target="_blank">eWPTX</a>
+      <a class="cert" href="https://credentials.offsec.com/7e998f35-47ab-4d4b-ab63-7088d23249f6#acc.Tyo4irJe" target="_blank">OSWP</a>
+    </div>
+
+    <div class="certs-label">// TIER 2 — SPECIALIZED</div>
+    <div class="certs-grid" style="margin-bottom:1rem">
+      <a class="cert dim" href="https://labs.cyberwarfare.live/credential/achievement/686315c40780c3f7d3ba1d5d" target="_blank">CRTA</a>
+      <a class="cert dim" href="https://labs.cyberwarfare.live/credential/achievement/69d9a6ae5691b2ace3eff4de" target="_blank">Multi-Cloud Red Team</a>
+      <a class="cert dim" href="https://certs.ine.com/6fb79f93-3bb2-4fce-b601-bcf27c543366#acc.9IRdW1y2" target="_blank">eCPPTv2</a>
+      <a class="cert dim" href="https://certs.ine.com/902c3f12-9c77-462b-8f3a-ed3b43316df9#acc.lEmVOjsg" target="_blank">eWPT</a>
+      <a class="cert dim" href="https://candidate.speedexam.net/certificate.aspx?SSTATE=am4131EniU8ntjp4bO5mXdShTcwC4be8HvDKx4ZqcZib50p5q+7C1fvhZcD55wKE15CaYdwzcEYKHPw0f/Km4qCVyNvPuqJGcx9UuBXLB1I=" target="_blank">CMPen-iOS</a>
+      <a class="cert dim" href="https://candidate.speedexam.net/certificate.aspx?SSTATE=am4131EniU8ntjp4bO5mXS8frhl/RcdOuWgkXMXRidbuJykYA7fnPOfTIE9qtdGPJirjipnmtpFd0cj+NuTdIyQD/rcKzav13/VuiYgA3NY=" target="_blank">CMPen-Android</a>
+      <a class="cert dim" href="https://learn.nvidia.com/certificates?id=0pzK0VTMS82gq7B9FIHAIw#" target="_blank">NVIDIA Adversarial ML</a>
+    </div>
+
+    <div class="certs-label">// TIER 3 — FOUNDATIONAL</div>
+    <div class="certs-grid">
+      <a class="cert dim2" href="https://certs.ine.com/b97d438d-931a-4d6d-b7c6-111012e69adf#acc.ORW2GwS5" target="_blank">ICCA</a>
+      <a class="cert dim2" href="https://certs.ine.com/983f9ef2-b018-479a-8bec-31bf931311b0#acc.9vECWygZ" target="_blank">eJPTv2</a>
+      <a class="cert dim2" href="https://assets.tryhackme.com/certification-certificate/68967877a315ed46cc903899.pdf" target="_blank">THM PT1</a>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-text">///</span><div class="divider-line"></div></div>
+
+  <section class="section">
+    <div class="sec-prompt">root@kali:~# grep -r <span>"red_team"</span> experience/<span class="cursor"></span></div>
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">Experience</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="company">Mercado Livre</span>
+        <span class="period">Oct 2025 – Present</span>
+      </div>
+      <div class="role">Senior Cybersecurity Engineer · Offensive Security</div>
+      <ul class="job-bullets">
+        <li>Full-scope penetration tests across web, API, infrastructure, and cloud environments</li>
+        <li>Advanced threat simulation using red team tactics on cloud and on-chain infrastructure</li>
+        <li>Purple team exercises with MITRE ATT&CK mapping to validate detection and response</li>
+        <li>Smart contract audits on Solidity/EVM protocols: reentrancy, oracle manipulation, flash loan exploits</li>
+        <li>AI security assessments targeting LLMs, MCP servers, RAG pipelines, and chatbot interfaces including prompt injection, jailbreaking, data leakage, and model evasion techniques</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="company">Vivo · Telefônica Brasil</span>
+        <span class="period">Dec 2021 – Nov 2025 · 4 yrs</span>
+      </div>
+
+      <div class="sub-role-block">
+        <div class="role">Consultant Offensive Security · Red Team / Purple Team <span class="sub-period">Mar 2024 – Nov 2025</span></div>
+        <ul class="job-bullets">
+          <li>Led red team operations simulating real-world APTs across internal, cloud, and external environments</li>
+          <li>Adversary simulations and breach and attack simulations using Cymulate with MITRE ATT&CK mapping and OWASP guidelines to validate security posture against evolving threats</li>
+          <li>Custom attack chains covering initial access, lateral movement, and exfiltration to assess enterprise resilience and identify detection gaps</li>
+          <li>Built offensive security labs for PoC testing, detection bypass, and exploit validation</li>
+          <li>Collaborated with blue teams in purple team exercises to test and enhance detection and response capabilities</li>
+          <li>AI security assessments covering LLMs, RAG pipelines, and chatbot interfaces including prompt injection, jailbreaking, and data leakage testing</li>
+        </ul>
+      </div>
+
+      <div class="sub-role-block">
+        <div class="role">Senior Offensive Security · Red Team / Purple Team <span class="sub-period">Dec 2021 – Mar 2024</span></div>
+        <ul class="job-bullets">
+          <li>Full-scope penetration tests covering web, API, mobile, infrastructure, and cloud environments</li>
+          <li>Simulated advanced threat scenarios using red team tactics aligned to real-world adversaries</li>
+          <li>Built custom cyber ranges to replicate environments with exploitable misconfigurations and zero-day simulations</li>
+          <li>Produced detailed risk-based reports with actionable remediation aligned to business impact</li>
+          <li>Researched exploitation techniques involving AI security, including data poisoning and adversarial ML</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="company">PUCPR</span>
+        <span class="period">Oct 2018 – Nov 2021 · 3 yrs</span>
+      </div>
+      <div class="role">Red Team Security Analyst · Offensive Security</div>
+      <ul class="job-bullets">
+        <li>Offensive security assessments across enterprise systems and cloud infrastructure</li>
+        <li>Phishing, API abuse, and post-exploitation chains in controlled red team simulations</li>
+        <li>Threat emulation labs aligned with MITRE ATT&CK to train internal teams</li>
+        <li>Research on ML adversarial robustness and offensive applications of AI</li>
+      </ul>
+    </div>
+
+    <div class="job">
+      <div class="job-header">
+        <span class="company">Exacom</span>
+        <span class="period">Jul 2012 – Sep 2018 · 6 yrs 3 mos</span>
+      </div>
+
+      <div class="sub-role-block">
+        <div class="role">Offensive Security Analyst · Pentester <span class="sub-period">Jun 2014 – Sep 2018</span></div>
+        <ul class="job-bullets">
+          <li>Conducted offensive security tests on internal systems, APIs, and mobile applications</li>
+          <li>Developed custom scripts and tools to automate enumeration and exploitation</li>
+          <li>Produced threat models for lateral movement and privilege escalation in Windows domains</li>
+          <li>Delivered risk-based reports for technical and executive audiences with actionable insights</li>
+        </ul>
+      </div>
+
+      <div class="sub-role-block">
+        <div class="role">Infrastructure Engineer · Network &amp; Server Administration <span class="sub-period">Jul 2012 – May 2014</span></div>
+        <ul class="job-bullets">
+          <li>Managed physical and virtual infrastructure: VMware, Hyper-V, Linux, Windows Server</li>
+          <li>Hardened servers and network devices, and implemented firewall and VPN configurations</li>
+          <li>Monitored systems using Zabbix/Nagios and ensured SLA compliance across data center assets</li>
+          <li>Supported backup, disaster recovery, and high-availability environments for corporate clients</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-text">///</span><div class="divider-line"></div></div>
+
+  <section class="section">
+    <div class="sec-prompt">root@kali:~# cat <span>education.json</span><span class="cursor"></span></div>
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">Education</span>
+      <div class="section-line"></div>
+    </div>
+    <div class="edu-item">
+      <div class="edu-year">2021–2025</div>
+      <div>
+        <div class="edu-degree">PhD · Applied Informatics</div>
+        <div class="edu-school">Pontifícia Universidade Católica do Paraná</div>
+        <div class="edu-area">Systems Security — Network-Based Intrusion Detection Systems with Big Data</div>
+      </div>
+    </div>
+    <div class="edu-item">
+      <div class="edu-year">2019–2021</div>
+      <div>
+        <div class="edu-degree">Master's · Applied Informatics</div>
+        <div class="edu-school">Pontifícia Universidade Católica do Paraná</div>
+        <div class="edu-area">Systems Security — Network-Based Intrusion Detection Systems with Big Data</div>
+      </div>
+    </div>
+    <div class="edu-item">
+      <div class="edu-year">2015–2017</div>
+      <div>
+        <div class="edu-degree">Postgraduate · Networks and Systems Security</div>
+        <div class="edu-school">Pontifícia Universidade Católica do Paraná</div>
+      </div>
+    </div>
+    <div class="edu-item">
+      <div class="edu-year">2011–2014</div>
+      <div>
+        <div class="edu-degree">Graduate · Systems Analysis and Development</div>
+        <div class="edu-school">Pontifícia Universidade Católica do Paraná</div>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-text">///</span><div class="divider-line"></div></div>
+
+  <section class="section">
+    <div class="sec-prompt">root@kali:~# nmap -sV --script <span>skills.nse</span> localhost<span class="cursor"></span></div>
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <span class="section-title">Technical skills</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="skills-group">
+      <div class="skills-label">// OFFENSIVE SECURITY</div>
+      <div class="skills-row">
+        <span class="skill skill-hi">Red Team Ops</span>
+        <span class="skill skill-hi">Purple Team</span>
+        <span class="skill skill-hi">Web Pentesting</span>
+        <span class="skill skill-hi">API Security</span>
+        <span class="skill skill-hi">Network Pentesting</span>
+        <span class="skill skill-hi">Exploit Development</span>
+        <span class="skill skill-hi">Phishing / Social Eng.</span>
+        <span class="skill skill-hi">Post-Exploitation</span>
+      </div>
+    </div>
+
+    <div class="skills-group">
+      <div class="skills-label">// INFRASTRUCTURE &amp; CLOUD</div>
+      <div class="skills-row">
+        <span class="skill">Active Directory</span>
+        <span class="skill">Kerberos / ADCS</span>
+        <span class="skill">AWS</span>
+        <span class="skill">Azure</span>
+        <span class="skill">Lateral Movement</span>
+        <span class="skill">Privilege Escalation</span>
+        <span class="skill">C2 Frameworks</span>
+        <span class="skill">VMware / Hyper-V</span>
+      </div>
+    </div>
+
+    <div class="skills-group">
+      <div class="skills-label">// MOBILE</div>
+      <div class="skills-row">
+        <span class="skill">iOS Pentesting</span>
+        <span class="skill">Android Pentesting</span>
+        <span class="skill">SSL Pinning Bypass</span>
+        <span class="skill">Jailbreak / Root Detection Bypass</span>
+        <span class="skill">Dynamic Instrumentation</span>
+        <span class="skill">Runtime Analysis</span>
+      </div>
+    </div>
+
+    <div class="skills-group">
+      <div class="skills-label">// BLOCKCHAIN &amp; WEB3</div>
+      <div class="skills-row">
+        <span class="skill">Smart Contract Auditing</span>
+        <span class="skill">Solidity / EVM</span>
+        <span class="skill">DeFi Exploit Research</span>
+        <span class="skill">Reentrancy Attacks</span>
+        <span class="skill">Flash Loan Exploits</span>
+        <span class="skill">Oracle Manipulation</span>
+        <span class="skill">Access Control Flaws</span>
+        <span class="skill">On-Chain Forensics</span>
+      </div>
+    </div>
+
+    <div class="skills-group">
+      <div class="skills-label">// AI &amp; DEFENSIVE</div>
+      <div class="skills-row">
+        <span class="skill">Adversarial ML</span>
+        <span class="skill">LLM Security / AI Red Teaming</span>
+        <span class="skill">Prompt Injection</span>
+        <span class="skill">Data Poisoning</span>
+        <span class="skill">IDS / IPS</span>
+        <span class="skill">Threat Intelligence</span>
+        <span class="skill">MITRE ATT&amp;CK</span>
+        <span class="skill">Detection Engineering</span>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-text">///</span><div class="divider-line"></div></div>
+
+  <section class="section">
+    <div class="sec-prompt">root@kali:~# find . -name <span>"*.pdf"</span> -path "*/papers/*"<span class="cursor"></span></div>
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <span class="section-title">Publications</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="certs-label" style="margin-bottom:0.75rem">// JOURNALS &amp; TRANSACTIONS</div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://ieeexplore.ieee.org/stamp/stamp.jsp?arnumber=9893186" target="_blank">Reinforcement learning for intrusion detection: More model longness and fewer updates</a>
+      <div class="pub-meta">RR Dos Santos, EK Viegas, AO Santin, VV Cogo · <span class="pub-venue">IEEE Transactions on Network and Service Management</span> · 2022</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://secplab.ppgia.pucpr.br/files/papers/2023cose.pdf" target="_blank">Federated learning for reliable model updates in network-based intrusion detection</a>
+      <div class="pub-meta">RR Dos Santos, EK Viegas, AO Santin, P Tedeschi · <span class="pub-venue">Computers &amp; Security</span> · 2023</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://secplab.ppgia.pucpr.br/files/papers/2020-14.pdf" target="_blank">PPCensor: Architecture for real-time pornography detection in video streaming</a>
+      <div class="pub-meta">J Mallmann, AO Santin, EK Viegas, RR Dos Santos · <span class="pub-venue">Future Generation Computer Systems</span> · 2020</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://www.ppgia.pucpr.br/~jean.barddal/assets/pdf/2021_AIRE_survey.pdf" target="_blank">Hierarchical classification of data streams: a systematic literature review</a>
+      <div class="pub-meta">E Tieppo, RR Santos et al. · <span class="pub-venue">Artificial Intelligence Review</span> · 2022</div>
+    </div>
+
+    <div class="certs-label" style="margin:1rem 0 0.75rem">// CONFERENCES (IEEE / INTERNATIONAL)</div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://ieeexplore.ieee.org/abstract/document/9685724" target="_blank">A reminiscent intrusion detection model based on deep autoencoders and transfer learning</a>
+      <div class="pub-meta">RR dos Santos, EK Viegas, AO Santin · <span class="pub-venue">IEEE GLOBECOM</span> · 2021</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://secplab.ppgia.pucpr.br/files/papers/2021-06.pdf" target="_blank">Improving intrusion detection confidence through a moving target defense strategy</a>
+      <div class="pub-meta">RR dos Santos, EK Viegas, AO Santin · <span class="pub-venue">IEEE GLOBECOM</span> · 2021</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://www.researchgate.net/profile/Eduardo-Kugler-Viegas/publication/353411590_A_Machine_Learning_Model_for_Detection_of_Docker-based_APP_Overbooking_on_Kubernetes/links/60facd4d169a1a0103b0cf8f/A-Machine-Learning-Model-for-Detection-of-Docker-based-APP-Overbooking-on-Kubernetes.pdf" target="_blank">A machine learning model for detection of docker-based APP overbooking on kubernetes</a>
+      <div class="pub-meta">F Ramos, E Viegas, A Santin, RR dos Santos et al. · <span class="pub-venue">IEEE ICC</span> · 2021</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://secplab.ppgia.pucpr.br/files/papers/2021-02.pdf" target="_blank">A multi-view intrusion detection model for reliable and autonomous model updates</a>
+      <div class="pub-meta">RL Tomio, EK Viegas, AO Santin, RR dos Santos · <span class="pub-venue">IEEE ICC</span> · 2021</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://d1wqtxts1xzle7.cloudfront.net/88261776/2020-7-libre.pdf" target="_blank">A Host-based Intrusion Detection Model Based on OS Diversity for SCADA</a>
+      <div class="pub-meta">BB Bulle, AO Santin, EK Viegas, RR dos Santos · <span class="pub-venue">IECON</span> · 2020</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://www.di.fc.ul.pt/~vcogo/publications/2020_aina_long_lasting.pdf" target="_blank">A long-lasting reinforcement learning intrusion detection model</a>
+      <div class="pub-meta">RR dos Santos, EK Viegas, A Santin, VV Cogo · <span class="pub-venue">AINA</span> · 2020</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://sol.sbc.org.br/index.php/sbseg/article/download/13978/13827" target="_blank">Mitigando os Efeitos de GAN em Classificação de Imagens com CNN</a>
+      <div class="pub-meta">J Mallmann, A Santin, A Britto, R Santos · <span class="pub-venue">SBSeg</span> · 2019</div>
+    </div>
+
+    <div class="certs-label" style="margin:1rem 0 0.75rem">// NATIONAL CONFERENCES &amp; OTHERS</div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://sol.sbc.org.br/index.php/sbseg/article/download/19251/19080/" target="_blank">Sistema de Detecção de Intrusão Confiável Baseado em Aprendizagem por Fluxo</a>
+      <div class="pub-meta">EK Viegas, AO Santin, RR dos Santos, V Abreu · <span class="pub-venue">SBSeg</span> · 2020</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://sol.sbc.org.br/index.php/sbseg/article/download/17321/17159" target="_blank">Um modelo de detecção de intrusão baseado em deep autoencoders e transfer learning</a>
+      <div class="pub-meta">RR dos Santos, EK Viegas, AO Santin · <span class="pub-venue">SBSeg</span> · 2021</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://sol.sbc.org.br/index.php/sbseg_estendido/article/download/19275/19104" target="_blank">Ferramenta PPCensor: detecção de pornografia em tempo real no streaming de vídeo</a>
+      <div class="pub-meta">J Mallmann, AO Santin, EK Viegas, RR dos Santos · <span class="pub-venue">SBSeg</span> · 2020</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://sol.sbc.org.br/index.php/sbseg/article/download/19252/19081/" target="_blank">Um Sistema de Detecção de Intrusão Baseado em Aprendizagem por Reforço</a>
+      <div class="pub-meta">RR dos Santos, EK Viegas, AO Santin · <span class="pub-venue">SBSeg</span> · 2020</div>
+    </div>
+    <div class="pub-item">
+      <a class="pub-title-link" href="https://www.ppgia.pucpr.br/pt/arquivos/mestrado/dissertacoes/2021/DissertacaoRoger_Final.pdf" target="_blank">Aprendizagem por Reforço para Detecção de Intrusão ao Longo do Tempo</a>
+      <div class="pub-meta">RR dos Santos · <span class="pub-venue">Master's Dissertation · PUCPR</span> · 2021</div>
+    </div>
+    <div class="pub-item">
+      <div class="pub-title">Ataques e Descoberta de Vulnerabilidades em Redes Corporativas</div>
+      <div class="pub-meta">RR dos Santos, J Mallmann · <span class="pub-venue">Book Chapter</span> · 2019</div>
+    </div>
+    <div class="pub-item">
+      <div class="pub-title">Estudo para Aplicação de IDS no Instituto Federal Catarinense</div>
+      <div class="pub-meta">RR dos Santos, J Mallmann · <span class="pub-venue">TIC</span> · 2020</div>
+    </div>
+    <div class="pub-item">
+      <div class="pub-title">Servidor de Gerência de Rede</div>
+      <div class="pub-meta">RR dos Santos, J Mallmann · <span class="pub-venue">Technical Report</span> · 2021</div>
+    </div>
+
+    <div style="margin-top:1rem">
+      <a class="pub-link" href="https://scholar.google.com.br/citations?user=-EDkpFgAAAAJ&hl=pt-BR&authuser=1">→ full list on Google Scholar</a>
+    </div>
+  </section>
+
+  <div class="divider"><div class="divider-line"></div><span class="divider-text">///</span><div class="divider-line"></div></div>
+
+  <section class="section">
+    <div class="sec-prompt">root@kali:~# cat <span>/proc/patents</span> | grep -i "INPI"<span class="cursor"></span></div>
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <span class="section-title">Patents</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="patent-item">
+      <div class="patent-header">
+        <span class="patent-type">PI</span>
+        <span class="patent-num">BR 10 2021 011726 5</span>
+        <span class="patent-status">Filed · 2021</span>
+      </div>
+      <div class="patent-title">Method for Pornography Detection in Videos and Image Publishing without Exposure of Body Parts</div>
+      <div class="patent-meta">Invention Patent · INPI Brazil · <a class="patent-link" href="https://busca.inpi.gov.br/pePI/" target="_blank">busca.inpi.gov.br</a></div>
+    </div>
+
+    <div class="patent-item">
+      <div class="patent-header">
+        <span class="patent-type">MU</span>
+        <span class="patent-num">BR 51 2024 000704 0</span>
+        <span class="patent-status">Filed · 2024</span>
+      </div>
+      <div class="patent-title">An Intrusion Detection Tool Based on Federated Machine Learning</div>
+      <div class="patent-meta">Utility Model · INPI Brazil · <a class="patent-link" href="https://busca.inpi.gov.br/pePI/" target="_blank">busca.inpi.gov.br</a></div>
+    </div>
+
+    <div class="patent-item">
+      <div class="patent-header">
+        <span class="patent-type">MU</span>
+        <span class="patent-num">BR 51 2024 000707 5</span>
+        <span class="patent-status">Filed · 2024</span>
+      </div>
+      <div class="patent-title">An Intrusion Detection Tool Based on Deep Autoencoders and Transfer Learning</div>
+      <div class="patent-meta">Utility Model · INPI Brazil · <a class="patent-link" href="https://busca.inpi.gov.br/pePI/" target="_blank">busca.inpi.gov.br</a></div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <span class="footer-id">// roger-santos · offensive security · 2026</span>
+    <div class="status"><span class="status-dot"></span>available for engagements</div>
+    <div class="footer-links">
+      <a href="https://linkedin.com/in/rogerwxd">LinkedIn</a>
+      <a href="https://lattes.cnpq.br/3797351864330209">Lattes</a>
+      <a href="https://scholar.google.com.br/citations?user=-EDkpFgAAAAJ&hl=pt-BR&authuser=1">Scholar</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
